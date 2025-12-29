@@ -49,6 +49,7 @@ canvas {
 .hero__logo {
   width: 78.08181762695312px;
   height: 78.08181762695312px;
+  user-select: none;
 }
 
 .hero__logo-text {
@@ -67,6 +68,7 @@ canvas {
 }
 .hero__text-line {
   height: 80px;
+  user-select: none;
 }
 .hero__title {
   font-family: HelveticaNeueCyr;
@@ -90,34 +92,11 @@ canvas {
   border-right: 10px solid transparent;
 }
 
-/* The typing effect: expand width from 0 to 100% */
-@keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-/* The cursor effect: toggle border color from transparent to visible */
-@keyframes blink-caret {
-  0% {
-    border-color: transparent;
-  }
-  50% {
-    border-color: orange;
-  }
-  100% {
-    border-color: transparent;
-  }
-}
-
 .hero__title--animate {
   animation: typing 1s steps(30, end), blink-caret 0.5s step-end 2;
 }
+
 .hero__button {
-  width: 529px;
   height: 94px;
   display: flex;
   gap: 10px;
@@ -125,23 +104,129 @@ canvas {
   align-items: center;
   border-radius: 98px;
   background: linear-gradient(270.85deg, #ff9f4d -5.46%, #e16015 97.11%);
-  box-shadow: 0px 18px 131.8px 0px #f47a1c61;
   box-shadow: 0px 5px 53px 0px #de600061;
+  width: 529px;
+  --shimmer-inset: 40px;
+  --shimmer-glow-hue: 222deg;
+  --shimmer-shadow-hue: 180deg;
+  --shimmer-spring-easing: linear(
+    0,
+    0.002,
+    0.01 0.9%,
+    0.038 1.8%,
+    0.156,
+    0.312 5.8%,
+    0.789 11.1%,
+    1.015 14.2%,
+    1.096,
+    1.157,
+    1.199,
+    1.224 20.3%,
+    1.231,
+    1.231,
+    1.226,
+    1.214 24.6%,
+    1.176 26.9%,
+    1.057 32.6%,
+    1.007 35.5%,
+    0.984,
+    0.968,
+    0.956,
+    0.949 42%,
+    0.946 44.1%,
+    0.95 46.5%,
+    0.998 57.2%,
+    1.007,
+    1.011 63.3%,
+    1.012 68.3%,
+    0.998 84%,
+    1
+  );
+  --shimmer-spring-duration: 1.33s;
+  position: relative;
+  transition: all var(--shimmer-spring-duration) var(--shimmer-spring-easing);
+}
+.hero__button:hover:not(:active) {
+  transition-duration: calc(var(--shimmer-spring-duration) * 0.5);
+  scale: 1.2;
+  box-shadow: 0 4px 8px -2px hsl(var(--shimmer-glow-hue) 50% 20% / 50%),
+    inset 0 0 0 transparent;
+}
+.hero__button:hover .hero__button-text {
+  animation: shimmer-text 0.66s ease-in 1 both;
+}
+.hero__button:hover .hero__button-shimmer::before,
+.hero__button:hover .hero__button-shimmer::after {
+  opacity: 1;
+  animation: shimmer-shine 1.2s ease-in 1 forwards;
 }
 .hero__button-text {
   font-family: HelveticaNeueCyr;
   font-weight: 550;
   font-style: Medium;
   font-size: 32px;
-  leading-trim: CAP_HEIGHT;
   line-height: 90%;
   letter-spacing: -3%;
-  color: #0c0c0c;
+  color: transparent;
+  background-clip: text;
+  background-color: #0c0c0c;
+  background-image: linear-gradient(
+    120deg,
+    transparent,
+    hsla(var(--shimmer-glow-hue), 100%, 80%, 0.66) 40%,
+    hsla(var(--shimmer-glow-hue), 100%, 90%, 0.9) 50%,
+    transparent 52%
+  );
+  background-repeat: no-repeat;
+  background-size: 300% 300%;
+  background-position: center 200%;
 }
+.hero__button-shimmer {
+  position: absolute;
+  inset: calc(var(--shimmer-inset) * -1);
+  border-radius: inherit;
+  pointer-events: none;
+  mask-image: conic-gradient(
+    from var(--shimmer, 0deg),
+    transparent 0%,
+    transparent 20%,
+    black 36%,
+    black 45%,
+    transparent 50%,
+    transparent 70%,
+    black 85%,
+    black 95%,
+    transparent 100%
+  );
+  mask-size: cover;
+  animation: shimmer 1s linear infinite both;
+}
+.hero__button-shimmer::before,
+.hero__button-shimmer::after {
+  opacity: 0;
+  content: "";
+  border-radius: inherit;
+  position: absolute;
+  inset: var(--shimmer-inset);
+}
+
+.hero__button-shimmer::before {
+  box-shadow: 0 0 calc(var(--shimmer-inset) * 0.1) 2px
+      hsl(var(--shimmer-glow-hue) 20% 95%),
+    0 0 calc(var(--shimmer-inset) * 0.18) 4px
+      hsl(var(--shimmer-glow-hue) 20% 80%),
+    0 0 calc(var(--shimmer-inset) * 0.33) 4px
+      hsl(var(--shimmer-glow-hue) 50% 70%),
+    0 0 calc(var(--shimmer-inset) * 0.66) 5px
+      hsl(var(--shimmer-glow-hue) 100% 70%);
+  z-index: -1;
+}
+
 .hero__button-triangle {
   height: 20px;
   width: 20px;
 }
+
 .hero__image {
   position: absolute;
   top: 0;
@@ -235,4 +320,63 @@ canvas {
   line-height: 90%;
   letter-spacing: -3%;
   color: #ffffff;
+}
+
+@keyframes shimmer-text {
+  0% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: -100% center;
+  }
+}
+
+@property --shimmer {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 33deg;
+}
+
+@keyframes shimmer {
+  0% {
+    --shimmer: 0deg;
+  }
+  100% {
+    --shimmer: 360deg;
+  }
+}
+@keyframes shimmer-shine {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes blink-caret {
+  0% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: orange;
+  }
+  100% {
+    border-color: transparent;
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
