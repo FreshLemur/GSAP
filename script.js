@@ -1,3 +1,31 @@
+const heroTitleTextChanging = () => {
+  const heroTitle = document.querySelector(".hero__title");
+  const phrases = ["Find your dream job", "Move easily", "Live globally"];
+  const animationClass = "hero__title--animate";
+  let index = 0;
+
+  // Set the initial default value
+  heroTitle.textContent = phrases[0];
+
+  setInterval(() => {
+    // 1. Remove the class to "reset" the animation
+    heroTitle.classList.remove(animationClass);
+
+    // Trigger a "reflow" to make the browser notice the class was removed
+    // This is a trick to ensure the animation restarts
+    void heroTitle.offsetWidth;
+
+    // 2. Update the index and change the text
+    index = (index + 1) % phrases.length;
+    heroTitle.textContent = phrases[index];
+
+    // 3. Add the class back to trigger the animation
+    heroTitle.classList.add(animationClass);
+  }, 4000);
+};
+
+heroTitleTextChanging();
+
 var container;
 var camera, scene, renderer;
 var framesCount = 0;
@@ -39,7 +67,6 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor("#0f0f1f");
 
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
