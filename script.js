@@ -1,3 +1,45 @@
+gsap.registerPlugin(ScrollTrigger);
+
+let panels = gsap.utils.toArray(".panel");
+
+let tl = gsap.timeline({
+  scrollTrigger: {
+    trigger: "#main",
+    start: "top top",
+    // Keep the "end" value to define how much the user has to scroll
+    end: () => "+=" + (panels.length - 1) * 100 + "%",
+    scrub: 1,
+    pin: true,
+    snap: 1 / (panels.length - 1),
+  },
+});
+
+// Loop through panels and move them to the LEFT
+panels.forEach((panel, i) => {
+  if (i === panels.length - 1) return; // Don't animate the last page
+
+  tl.to(panel, {
+    xPercent: -100, // Move the current page to the left to reveal the next
+    ease: "none",
+  });
+});
+
+ScrollTrigger.create({
+  trigger: "#main",
+  start: "top top",
+  end: () => "+=" + (panels.length - 1) * 100 + "%",
+  onUpdate: (self) => {
+    // Calculate current page based on scroll progress
+    const progress = self.progress;
+    const totalPages = panels.length;
+    const currentIndex = Math.round(progress * (totalPages - 1)) + 1;
+
+    // Update your counter text (assuming you have this class)
+    const counterSpan = document.querySelector(".carousel-nav__counter-text");
+    if (counterSpan) counterSpan.innerText = currentIndex;
+  },
+});
+
 const heroTitleTextChanging = () => {
   const heroTitle = document.querySelector(".hero__title");
   const phrases = ["Find your dream job", "Move easily", "Live globally"];
