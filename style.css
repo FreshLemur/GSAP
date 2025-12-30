@@ -286,7 +286,7 @@ canvas {
   flex-direction: row;
   gap: 8px;
   align-items: center;
-  z-index: 2;
+  z-index: 100;
 }
 .carousel-nav__controls {
   border: 1px solid #ffffff1a;
@@ -320,6 +320,8 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    background-color 0.3s ease;
 }
 .carousel-nav__dot--active {
   background-color: #f67f1b;

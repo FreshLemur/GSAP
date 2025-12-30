@@ -1,4 +1,4 @@
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 let panels = gsap.utils.toArray(".panel");
 
@@ -11,6 +11,27 @@ let tl = gsap.timeline({
     scrub: 1,
     pin: true,
     snap: 1 / (panels.length - 1),
+
+    onUpdate: (self) => {
+      const progress = self.progress;
+      const totalPages = panels.length;
+      const currentIndex = Math.round(progress * (totalPages - 1)); // 0-based index for arrays
+
+      // 1. Update Counter Text (1-based for humans)
+      const counterSpan = document.querySelector(".carousel-nav__counter-text");
+      if (counterSpan) counterSpan.innerText = currentIndex + 1;
+
+      // 2. Handle Dots
+      const carouselDots = document.querySelectorAll(".carousel-nav__dot");
+
+      carouselDots.forEach((dot, i) => {
+        if (i === currentIndex) {
+          dot.classList.add("carousel-nav__dot--active");
+        } else {
+          dot.classList.remove("carousel-nav__dot--active");
+        }
+      });
+    },
   },
 });
 
@@ -28,16 +49,54 @@ ScrollTrigger.create({
   trigger: "#main",
   start: "top top",
   end: () => "+=" + (panels.length - 1) * 100 + "%",
-  onUpdate: (self) => {
-    // Calculate current page based on scroll progress
-    const progress = self.progress;
-    const totalPages = panels.length;
-    const currentIndex = Math.round(progress * (totalPages - 1)) + 1;
+});
 
-    // Update your counter text (assuming you have this class)
-    const counterSpan = document.querySelector(".carousel-nav__counter-text");
-    if (counterSpan) counterSpan.innerText = currentIndex;
-  },
+const dots = document.querySelectorAll(".carousel-nav__dot-button");
+const nextBtn = document.querySelector(".carousel-nav__arrow--next");
+const prevBtn = document.querySelector(".carousel-nav__arrow--prev");
+
+// Helper function to scroll to a specific panel index
+function goToPanel(index) {
+  // Clamp index so it doesn't go below 0 or above total panels
+  if (index < 0 || index >= panels.length) return;
+
+  const st = tl.scrollTrigger;
+  // Calculate the scroll position:
+  // start of trigger + (percentage of total scroll distance)
+  const totalScroll = st.end - st.start;
+  const targetScroll = st.start + (index / (panels.length - 1)) * totalScroll;
+
+  gsap.to(window, {
+    scrollTo: targetScroll,
+    duration: 1,
+    ease: "power2.inOut",
+  });
+}
+
+// 1. Dot Clicking Logic (for the first 3 dots)
+dots.forEach((dot, i) => {
+  dot.addEventListener("click", () => {
+    if (i < panels.length) {
+      // Only allow clicks for existing panels
+      goToPanel(i);
+    }
+  });
+});
+
+// 2. Arrow Clicking Logic
+nextBtn.addEventListener("click", () => {
+  // Use the progress from the scrollTrigger to find current panel
+  const currentIndex = Math.round(
+    tl.scrollTrigger.progress * (panels.length - 1)
+  );
+  goToPanel(currentIndex + 1);
+});
+
+prevBtn.addEventListener("click", () => {
+  const currentIndex = Math.round(
+    tl.scrollTrigger.progress * (panels.length - 1)
+  );
+  goToPanel(currentIndex - 1);
 });
 
 const heroTitleTextChanging = () => {
