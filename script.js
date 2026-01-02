@@ -1,3 +1,25 @@
+var capturer = new CCapture({
+  format: "webm", // Формат відео
+  framerate: 60, // Частота кадрів
+  verbose: true, // Виводити лог у консоль
+  name: "threejs_animation", // Назва файлу
+});
+
+var isRecording = false;
+
+function toggleRecord() {
+  if (!isRecording) {
+    capturer.start();
+    isRecording = true;
+    console.log("Recording started...");
+  } else {
+    capturer.stop();
+    capturer.save();
+    isRecording = false;
+    console.log("Recording stopped. Preparing file...");
+  }
+}
+
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 let panels = gsap.utils.toArray(".panel");
@@ -141,8 +163,28 @@ var particles = [],
 // Math variables
 const deg = Math.PI / 180; // one degree
 
-init();
-sceneAnimation();
+function startAutomatedRecording() {
+  // Ініціалізуємо сцену
+  init();
+
+  // Включаємо запис
+  isRecording = true;
+  capturer.start();
+  console.log("Recording started automatically...");
+
+  // Запускаємо цикл анімації
+  sceneAnimation();
+}
+
+// 3. Запускаємо все, коли сторінка повністю готова
+window.onload = () => {
+  // Можна додати невелику затримку (наприклад, 500мс),
+  // щоб браузер встиг стабілізувати FPS
+  setTimeout(startAutomatedRecording, 500);
+};
+
+// init();
+// sceneAnimation();
 
 // Initiating Scene
 function init() {
@@ -230,6 +272,18 @@ function sceneAnimation() {
   localGroup.rotation.z = Math.sin(framesCount * 0.01);
 
   renderer.render(scene, camera);
+
+  if (isRecording) {
+    capturer.capture(renderer.domElement);
+
+    // АВТОСТОП: наприклад, знімаємо 600 кадрів (10 секунд при 60fps)
+    if (framesCount >= 1200) {
+      isRecording = false;
+      capturer.stop();
+      capturer.save();
+      console.log("Recording finished.");
+    }
+  }
 }
 
 function sceneParticles(size, length) {
